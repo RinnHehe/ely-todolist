@@ -1,0 +1,24 @@
+{
+  "name": "ely-marketplace-todo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev --name init",
+    "prisma:studio": "bunx prisma studio",
+    "build": "echo 'No build step'"
+  },
+  "dependencies": {
+    "elysia": "latest",
+    "@elysiajs/jwt": "latest",
+    "@prisma/client": "5.15.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "prisma": "5.15.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}
