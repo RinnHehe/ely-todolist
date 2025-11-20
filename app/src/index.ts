@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { PrismaClient } from "@prisma/client";
 import { jwt } from "@elysiajs/jwt";
+import { staticPlugin } from "@elysiajs/static";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -19,6 +20,7 @@ const requireUser = async (ctx: any) => {
 }
 
 const app = new Elysia()
+  .use(staticPlugin({ assets: "dist/assets", prefix: "/assets" }))
   .use(jwt({ name: "jwt", secret: JWT_SECRET }))
   .derive(async ({ jwt, headers }) => {
     const auth = headers.authorization;
@@ -31,7 +33,14 @@ const app = new Elysia()
       return { user: null };
     }
   })
-  .get("/", () => ({ message: "TODO API ready" }))
+  // Serve index.html for all non-API routes (SPA support)
+  .get("/*", ({ request }) => {
+    const url = new URL(request.url);
+    if (url.pathname.startsWith('/auth') || url.pathname.startsWith('/todos')) {
+      return { error: "Not found" };
+    }
+    return Bun.file("dist/index.html");
+  })
   // Auth: register
   .post("/auth/register", async ({ body }) => {
     const { email, password, name } = body as RegisterBody;
