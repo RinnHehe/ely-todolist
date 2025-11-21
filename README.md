@@ -21,8 +21,6 @@ Perfect for learning a modern, fast, and clean backend stack.
 - Mark tasks as completed or pending  
 - Fully stored and managed using PostgreSQL with Prisma  
 
-*(Add authentication, category, due date, etc. if your project includes them.)*
-
 ---
 
 ## 🧰 Tech Stack
@@ -32,7 +30,7 @@ Perfect for learning a modern, fast, and clean backend stack.
 - **Language:** TypeScript  
 - **Database:** PostgreSQL  
 - **ORM:** Prisma  
-- **Styling (optional):** TailwindCSS for frontend
+- **Styling:** TailwindCSS for frontend
 
 ---
 
@@ -42,7 +40,6 @@ Make sure you have installed:
 
 - Bun → https://bun.sh  
 - PostgreSQL  
-- Git (optional)
 
 Check Bun version:
 
