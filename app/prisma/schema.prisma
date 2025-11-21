@@ -17,6 +17,8 @@ model User {
   name        String?
   passwordHash String
   role        Role     @default(USER)
+  resetToken  String?
+  resetTokenExpiry DateTime?
   todos       Todo[]
   createdAt   DateTime @default(now())
 }

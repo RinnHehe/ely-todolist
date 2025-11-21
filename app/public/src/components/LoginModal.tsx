@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import Toast from './Toast';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -10,15 +11,39 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
   if (!isOpen) return null;
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Basic validation
+    if (!email.trim()) {
+      setError('Email is required');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
 
     try {
       const response = await fetch('/auth/login', {
@@ -34,9 +59,19 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      if (data.token) {
+      if (data.success && data.token) {
+        setToastMessage(data.message || 'Login successful!');
+        setShowToast(true);
+        
+        // Store remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        }
+        
         login(data.token);
-        navigate('/dashboard');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -44,7 +79,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md" onClick={onClose}>
+    <>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type="success"
+          onClose={() => setShowToast(false)}
+        />
+      )}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md" onClick={onClose}>
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-slideIn" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClose}
@@ -86,6 +129,29 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
           )}
 
+          <div className="mb-4 flex items-center justify-between">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="mr-2 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              />
+              <span className="text-sm text-gray-700">Remember me</span>
+            </label>
+            <a 
+              href="/forgot-password" 
+              className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                navigate('/forgot-password');
+              }}
+            >
+              Forgot password?
+            </a>
+          </div>
+
           <button
             type="submit"
             className="w-full py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all hover:shadow-lg"
@@ -102,5 +168,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </p>
       </div>
     </div>
+    </>
   );
 }
